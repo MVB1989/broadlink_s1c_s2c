@@ -22,7 +22,6 @@ import binascii
 import socket
 import datetime
 import logging
-import asyncio
 import traceback
 import json
 import threading
@@ -75,8 +74,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 """set up broadlink s1c platform"""
-@asyncio.coroutine
-def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+
+async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
     _LOGGER.debug("starting platform setup")
 
@@ -152,15 +151,14 @@ class S1C_SENSOR(Entity):
             "sensor_type": self._sensor_type,
             "last_changed": self._last_changed
         }
-
-    @asyncio.coroutine
-    def async_event_listener(self, event):
+      
+    async def async_event_listener(self, event):
         """handling incoming events and update ha state"""
         if (event.data.get(EVENT_PROPERTY_NAME) == self._name):
             _LOGGER.debug(self._name + " received " + UPDATE_EVENT)
             self._state = event.data.get(EVENT_PROPERTY_STATE)
             self._last_changed = event.time_fired
-            yield from self.async_update_ha_state()
+            await self.async_write_ha_state()
 
 
 class HubConnection(object):
